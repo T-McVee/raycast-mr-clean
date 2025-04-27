@@ -48,8 +48,8 @@ your-directory/
 
 ## Author
 
-Created by T-McVee  
-[Author Profile](https://raycast.com/T-McVee)
+Created by 
+[Tim McVinish](https://tmcvee.com)
 
 ## License
 
