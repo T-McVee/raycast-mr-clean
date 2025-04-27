@@ -27,6 +27,7 @@ A Raycast script that automatically organizes files and folders by their creatio
 ### Directory Structure
 
 The script will organize your files into the following structure:
+```
 your-directory/
 ├── 2024-03/
 ├── 2024-02/
@@ -36,6 +37,7 @@ your-directory/
 │ ├── 2023-08/
 │ └── ...
 └── mr_clean_was_here.txt
+```
 
 ## How It Works
 
