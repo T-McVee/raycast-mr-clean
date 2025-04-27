@@ -9,6 +9,7 @@
 # @raycast.icon 🫧
 # @raycast.needsConfirmation true
 # @raycast.argument1 { "type": "text", "placeholder": "Directory path", "optional": true }
+# @raycast.argument2 { "type": "text", "placeholder": "Undo cleaning?", "optional": true }
 
 # Documentation:
 # @raycast.description Organises files in the current directory into folders based on month created
@@ -19,6 +20,10 @@
 
 
 directory_path=$1
+undo_cleaning=$2
+
+echo "directory_path: $directory_path"
+echo "undo_cleaning: $undo_cleaning"
 
 # If no directory provided, get current Finder directory
 if [ -z "$directory_path" ]; then
@@ -36,8 +41,12 @@ if [ ! -d "$directory_path" ]; then
   exit 1
 fi
 
-echo "--- Mr Clean is in the dir ---"
-echo "Cleaning directory: $directory_path"
+echo "
+
+         🧼 MR CLEAN IS IN THE DIR! 🧹
+
+"
+
 
 calling_card_file_name="mr_clean_was_here.txt"
 
@@ -119,6 +128,8 @@ archive_old_files() {
 organise_directory() {
   target_dir_path=$1
 
+  echo "Cleaning directory: $target_dir_path"
+
   # get the last segment of the target directory path
   target_dir_name="$(basename "$target_dir_path")"
 
@@ -145,5 +156,49 @@ organise_directory() {
     echo "Last visited by Mr. Clean on $(date)" > "$target_dir_path/$calling_card_file_name"
   fi
 }
+
+flatten_directory() {
+  local target_dir=$1
+  echo "Flattening directory structure in: $target_dir"
+
+  # Move everything from _archive back to the target directory
+  if [ -d "$target_dir/_archive" ]; then
+    echo "Moving files from _archive back to $target_dir..."
+    # First move folders
+    find "$target_dir/_archive" -type d -not -path "$target_dir/_archive" -exec mv {} "$target_dir/" \;
+    # Then move remaining files
+    find "$target_dir/_archive" -type f -exec mv {} "$target_dir/" \;
+    rm -rf "$target_dir/_archive"
+  fi
+
+  # Move all fiels from YYYY-MM folders back to the target directory
+  for folder in "$target_dir"/*; do
+      folder_name=$(basename "$folder")
+      
+      # Check if folder matches YYYY-MM pattern
+      if [[ -d "$folder" && $folder_name =~ ^[0-9]{4}-[0-9]{2}$ ]]; then
+          echo "Moving contents from $folder_name back to main directory..."
+          # First move folders
+          find "$folder" -type d -not -path "$folder" -exec mv {} "$target_dir/" \;
+          # Then move remaining files
+          find "$folder" -type f -exec mv {} "$target_dir/" \;
+          rm -rf "$folder"
+      fi
+  done
+
+  # Remove the calling card if it exists
+  if [ -f "$target_dir/$calling_card_file_name" ]; then
+      rm "$target_dir/$calling_card_file_name"
+  fi
+  
+  echo "Directory structure has been flattened!"
+}
+
+# If undo cleaning is true, flatten the directory
+if [ "$undo_cleaning" = "u" ] || [ "$undo_cleaning" = "undo" ]; then
+  echo "Undoing cleaning..."
+  flatten_directory "$directory_path"
+  exit 0
+fi
 
 organise_directory "$directory_path" 

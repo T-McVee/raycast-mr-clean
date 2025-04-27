@@ -15,16 +15,21 @@ A Raycast script that automatically organizes files and folders by their creatio
 - [Raycast](https://raycast.com/) installed
 - Bash shell
 
+## Install
+- copy mr-clean-v1.0.sh into your raycast script directory
+- run `chmod +x mr-clean-v1.0.sh` to make the script executable
+
+
 ## Usage
 
-### Via Raycast
+### Clean a dir - via Raycast
 
 1. Open Raycast
 2. Type "Mr. Clean"
 3. Optionally provide a directory path, or leave blank to use current Finder window
 4. Confirm the action
 
-### Directory Structure
+#### Directory Structure
 
 The script will organize your files into the following structure:
 ```
@@ -39,12 +44,21 @@ your-directory/
 └── mr_clean_was_here.txt
 ```
 
+### Undo a clean - via Raycast
+
+1. Open Raycast
+2. Type "Mr. Clean"
+3. Optionally provide a directory path, or leave blank to use current Finder window
+4. Type "u" or "undo" for the second optional argument
+5. Confirm action
+
 ## How It Works
 
 1. If no directory is specified, the script uses the current Finder window location
 2. Files and folders are sorted into monthly directories (YYYY-MM format)
 3. Monthly folders older than 6 months are moved to the `_archive` directory
 4. A timestamp file (`mr_clean_was_here.txt`) is created in the source directory
+5. If undoing a clean, target the directory structure will be flattened, back to it's original state.
 
 ## Author
 
