@@ -21,9 +21,7 @@
 
 directory_path=$1
 undo_cleaning=$2
-
-echo "directory_path: $directory_path"
-echo "undo_cleaning: $undo_cleaning"
+calling_card_file_name="mr_clean_was_here.txt"
 
 # If no directory provided, get current Finder directory
 if [ -z "$directory_path" ]; then
@@ -32,7 +30,7 @@ if [ -z "$directory_path" ]; then
   echo "No directory provided, using current Finder directory: $directory_path"
 fi
 
-# handle no arguments
+# handle invalid directory
 if [ ! -d "$directory_path" ]; then
   echo "Please provide a valid directory to clean up."
   echo "Or, leave blank to use your current Finder directory."
@@ -40,17 +38,6 @@ if [ ! -d "$directory_path" ]; then
   
   exit 1
 fi
-
-echo "
-
-         🧼 MR CLEAN IS IN THE DIR! 🧹
-
-"
-
-
-calling_card_file_name="mr_clean_was_here.txt"
-
-
 
 # Helper functions
 
@@ -124,9 +111,48 @@ archive_old_files() {
   fi
 }
 
+check_safe_directory() {
+    local dir_to_check="$1"
+    
+    # Convert to absolute path
+    dir_to_check=$(cd "$dir_to_check" 2>/dev/null && pwd)
+    if [ $? -ne 0 ]; then
+        echo "⚠️  Error: Directory does not exist or is not accessible: $dir_to_check"
+        exit 1
+    fi
+
+    # Define allowed parent directories
+    allowed_dirs=(
+        "$HOME/Downloads"
+        "$HOME/Documents"
+        "$HOME/Desktop"
+        "$HOME/Pictures"
+    )
+
+    # Check if directory is in allowed list or is a subdirectory of allowed directories
+    allowed=0
+    for allowed_dir in "${allowed_dirs[@]}"; do
+        if [[ "$dir_to_check" == "$allowed_dir" || "$dir_to_check" == "$allowed_dir"/* ]]; then
+            allowed=1
+            break
+        fi
+    done
+
+    if [ $allowed -eq 0 ]; then
+        echo "⚠️  Error: Mr. Clean can only run in these directories (or their subdirectories):"
+        printf "   - %s\n" "${allowed_dirs[@]}"
+        echo ""
+        echo "Current directory: $dir_to_check"
+        exit 1
+    fi
+
+}
+
 # Main
 organise_directory() {
   target_dir_path=$1
+
+  check_safe_directory "$target_dir_path"
 
   echo "Cleaning directory: $target_dir_path"
 
@@ -159,6 +185,8 @@ organise_directory() {
 
 flatten_directory() {
   local target_dir=$1
+
+  check_safe_directory "$target_dir"
   echo "Flattening directory structure in: $target_dir"
 
   # Move everything from _archive back to the target directory
@@ -193,6 +221,12 @@ flatten_directory() {
   
   echo "Directory structure has been flattened!"
 }
+
+echo "
+
+         🫧 MR CLEAN IS IN THE DIR! 🧹
+
+"
 
 # If undo cleaning is true, flatten the directory
 if [ "$undo_cleaning" = "u" ] || [ "$undo_cleaning" = "undo" ]; then
