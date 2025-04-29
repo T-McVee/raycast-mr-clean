@@ -51,8 +51,7 @@ if [ ! -d "$directory_path" ]; then
 fi
 
 
-# Helper functions
-
+# Helper functions #
 sort_files_by_date() {
   file=$1
   file_name=$(basename "$file")
@@ -151,26 +150,16 @@ check_safe_directory() {
 
     if [ $allowed -eq 0 ]; then
         echo "⚠️  Error: Mr. Clean can only run in these directories (or their subdirectories):"
-        printf "   - %s\n" "${allowed_dirs[@]/#/$HOME/}"
+        printf "   - %s\n" "${allowed_dirs[@]}"
         echo ""
         echo "Current directory: $dir_to_check"
         exit 1
     fi
 
-    # Optional: Add warning for large directories
-    file_count=$(find "$dir_to_check" -maxdepth 1 -type f | wc -l)
-    if [ "$file_count" -gt 1000 ]; then
-        echo "⚠️  Warning: Directory contains more than 1000 files ($file_count files found)"
-        read -p "Processing large directories might take a while. Continue? (y/N) " confirm
-        if [[ ! $confirm =~ ^[Yy]$ ]]; then
-            echo "Operation cancelled."
-            exit 1
-        fi
-    fi
 }
 
 
-# Main
+# Main #
 organise_directory() {
   target_dir_path=$1
 
