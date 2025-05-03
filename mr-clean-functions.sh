@@ -110,6 +110,39 @@ check_safe_directory() {
 
 }
 
+check_directory_permissions() {
+    local dir="$1"
+    
+    # Check basic access
+    if [ ! -d "$dir" ]; then
+        echo "⚠️  Error: Not a directory: $dir"
+        return 1
+    fi
+    
+    # Check read/write/execute permissions
+    if [ ! -r "$dir" ]; then
+        echo "⚠️  Error: No read permission in $dir"
+        return 1
+    fi
+    if [ ! -w "$dir" ]; then
+        echo "⚠️  Error: No write permission in $dir"
+        return 1
+    fi
+    if [ ! -x "$dir" ]; then
+        echo "⚠️  Error: No execute permission in $dir"
+        return 1
+    fi
+    
+    # Check if we can create and remove files
+    if ! touch "$dir/.mr_clean_test" 2>/dev/null; then
+        echo "⚠️  Error: Cannot create files in $dir"
+        return 1
+    fi
+    rm -f "$dir/.mr_clean_test"
+    
+    return 0
+}
+
 # Main functions #
 organise_directory() {
   local target_dir_path=${1%/}  # Remove trailing slash if present
@@ -154,8 +187,10 @@ flatten_directory() {
   # Move everything from _archive back to the target directory
   if [ -d "$target_dir/_archive" ]; then
     echo "Moving files from _archive back to $target_dir..."
+    
     # First move folders
     find "$target_dir/_archive" -type d -not -path "$target_dir/_archive" -exec mv {} "$target_dir/" \;
+
     # Then move remaining files
     find "$target_dir/_archive" -type f -exec mv {} "$target_dir/" \;
     rm -rf "$target_dir/_archive"
@@ -190,5 +225,6 @@ export -f sort_folders_by_date
 export -f sort_by_date
 export -f archive_old_files
 export -f check_safe_directory
+export -f check_directory_permissions
 export -f organise_directory
 export -f flatten_directory

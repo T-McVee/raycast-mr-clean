@@ -56,6 +56,12 @@ if [ ! -d "$directory_path" ]; then
   exit 1
 fi
 
+# Check directory permissions
+if ! check_directory_permissions "$directory_path"; then
+    echo "⚠️  Error: Directory permissions check failed"
+    exit 1
+fi
+
 # Main execution #
 echo "
 
